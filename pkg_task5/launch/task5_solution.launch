@@ -1,0 +1,43 @@
+<!--
+Respected Instructors,
+    We request you to run "node_action_server_ros_iot_bridge.py", 
+    "node_ur5_1.py" and "node_ur5_2.py" separately in 3 different
+    terminal tabs after running this launch file
+    to avoid any internal Gazebo errors.
+    Please do follow this, 
+    Terminal 1: roslaunch pkg_task5 task5_solution.launch
+    Terminal 2: rosrun pkg_ros_iot_bridge node_action_server_ros_iot_bridge.py
+    Terminal 3: rosrun pkg_task5 node_ur5_1.py
+    Terminal 4: rosrun pkg_task5 node_ur5_2.py
+Thank You
+-Team VB#0038
+-->
+
+<launch>
+
+<rosparam file ="$(find pkg_ros_iot_bridge)/config/config_pyiot.yaml"/>
+
+<!-- Launch Task-5 Simulation Environment in Gazebo -->
+<include file="$(find pkg_vb_sim)/launch/task6_simulation.launch" />
+
+<include file="$(find pkg_vb_sim)/launch/two_ur5_move_group.launch" />
+
+<!-- Run Task-5 Shelf to Belt ROS Node -->
+    <!-- <node name= "node_ur5_1" pkg= "pkg_task5" type="node_ur5_1.py" output="screen"/> -->
+
+	<!-- Run Task-5 Belt to Bin ROS Node -->
+    <!-- <node name= "node_ur5_2" pkg= "pkg_task5" type="node_ur5_2.py" output="screen"/> -->
+
+    <!-- Run Task-5 ROS-IOT Bridge -->
+    <!-- <node name= "node_iot_ros_bridge_action_server" pkg= "pkg_ros_iot_bridge" type="node_action_server_ros_iot_bridge.py" output="screen"/> -->
+
+<!-- Recording Bag File for Submission -->
+    <arg name="record" default="false"/>
+    <arg name="rec_name" default="task6.bag"/>
+
+    <group if="$(arg record)">
+        <node name="rosbag_record_pick" pkg="rosbag" type="record"
+       args="record -O $(find pkg_task5)/bag_files/$(arg rec_name) --chunksize=10 /eyrc/vb/ur5_1/vacuum_gripper/logical_camera/ur5_1 /eyrc/vb/ur5_2/vacuum_gripper/logical_camera/ur5_2" output="screen"/>
+	</group>
+
+</launch>
