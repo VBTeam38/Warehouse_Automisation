@@ -1,0 +1,7 @@
+site_name: VB_0038
+nav:
+    - Introduction: index.md
+    - Implementation: implementation.md
+    - API Documentation : api_documentation.md
+theme: mkdocs
+use_directory_urls: false

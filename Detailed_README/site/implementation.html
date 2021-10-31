@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Implementation - VB_0038</title>
+        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">VB_0038</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="index.html">Introduction</a>
+                            </li>
+                            <li class="active">
+                                <a href="implementation.html">Implementation</a>
+                            </li>
+                            <li >
+                                <a href="api_documentation.html">API Documentation</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                            <li >
+                                <a rel="next" href="index.html">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="api_documentation.html">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#detailed-description-of-implementation">Detailed Description of Implementation</a></li>
+            <li><a href="#environment">Environment</a></li>
+            <li><a href="#working">Working</a></li>
+            <li><a href="#camera_1">Camera_1:</a></li>
+            <li><a href="#receiving-incoming-orders">Receiving Incoming Orders:</a></li>
+            <li><a href="#save-and-play">Save and Play:</a></li>
+            <li><a href="#ur51-arm">UR5#1 Arm:</a></li>
+            <li><a href="#conveyor">Conveyor:</a></li>
+            <li><a href="#logical-camera">Logical Camera:</a></li>
+            <li><a href="#ur52-arm">UR5#2 Arm:</a></li>
+            <li><a href="#updating-spreadsheets">Updating Spreadsheets:</a></li>
+            <li><a href="#google-apps-scripting">Google Apps Scripting:</a></li>
+            <li><a href="#email">Email:</a></li>
+            <li><a href="#dashboard">Dashboard:</a></li>
+            <li><a href="#dashboard-light-mode">Dashboard Light Mode</a></li>
+            <li><a href="#dashboard-dark-mode">Dashboard Dark Mode</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h2 id="detailed-description-of-implementation"><div style="color:red"><b>Detailed Description of Implementation</b></div></h2>
+<h4 id="environment"><b>Environment</b></h4>
+<p>We have a gazebo simulation environment of an Amazon Warehouse. In this warehouse we have the following objects:
+<ul>
+<li>Two UR5 robotic arms named UR5#1 and UR5#2</li>
+<li>Two Logical Cameras named Logical Camera#1 and Logical Camera#2</li>
+<li>Packages of high, low and medium priority</li>
+<li>Shelf which consists of the packages</li>
+<li>A 2D camera to detect the colours of the packages</li>
+<li>Conveyor belt to transport packages from one part of the warehouse to another</li>
+<li>Sorting bins for high, medium and low priority packages</li>
+</ul></p>
+<h4 id="working"><b>Working</b></h4>
+<h4 id="camera_1"><div style="color:blue"><b>Camera_1:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspThe camera_1 is used to identify the colours of the boxes in the individual shelves for the arm to go and pick up. The camera gives the feed of the entire shelf with all the packages in frame. Since it is not possible to identify the colours of the packages in one entire frame, we have segmented each of the boxes into its own separate image, which enables us to detect the colour by identifying the most dominant colour in the segment of the picture. This is then stored into the dictionary which then used in multiple parts of the upcoming program. The dictionary is published onto the Spreadsheet using the ROS-IOT Bridge to the “inventory” sheet. This is also used to map the colours to the trajectory files for the movement of the UR5#1 arm.</p>
+
+<h4 id="receiving-incoming-orders"><div style="color:blue"><b>Receiving Incoming Orders:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspAfter 1 minute of Simulation Time in Gazebo, a total of 9 orders are published onto the topic /eyrs/vb/RrSsVvPp/orders MQTT Topic at different intervals for each order. The yaml parameter file config_online_order.yaml is used to publish onto the MQTT Topic. We subscribe to this topic through our python code and every incoming order (in the form of a dictionary) is stored as an element of a list. This list is then published to a ROS Topic so that all our running nodes have access to this list.</p>
+
+<h4 id="save-and-play"><div style="color:blue"><b>Save and Play:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspMoveIt! saves the trajectories planned by the Planner (TrakIK Kinematics Planner) selected during the moveit_setup_assistant into a YAML File and then use it whenever you want. This is advantageous to us because you can save time by saving time off the planner by replaying the data stored in the YAML File.</p>
+
+<p>&nbsp&nbsp&nbsp&nbspBy giving the Planner sufficient amount of time to plan and sufficient number of attempts in the case of any controller failure or inability to plan a trajectory, we have taken 10 trials for each package on the shelf to and from the dropPose above the conveyor that amounts to around 240 files out of which some are null because it failed to save the trajectory. After an analysis of each of the files to find the most optimal trajectory for that package. All of the optimal files are placed inside the "pkg"/config/saved_trajectories/ which are then accessed by the play function to replay the trajectory.</p>
+
+<h4 id="ur51-arm"><div style="color:blue"><b>UR5#1 Arm:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspThis robot arm is used to pick up packages from the shelf and put them on the conveyor belt. Through the knowledge of the sorted list of incoming orders, it picks up the package with the highest priority.</p>
+
+<p>&nbsp&nbsp&nbsp&nbspWe have used save and play for the locations of all the packages on the shelf.</p>
+
+<h4 id="conveyor"><div style="color:blue"><b>Conveyor:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspAs mentioned earlier, we have two UR5 arms, one to pick up packages from the shelf and drop them onto the conveyor belt(UR5#1) and one to pick up packages from the conveyor belt and sort them into the correct bins (UR5#2).</p>
+
+<p>&nbsp&nbsp&nbsp&nbspThe conveyor belt is initially switched on at the maximum speed, and packages are dropped onto the moving conveyor belt by UR5#1. The conveyor belt then takes these packages to UR5#2. When the packages near UR5#2, the convyor belt is stopped to ensure the smooth pick up of the packages from the conveyor belt by the UR5#2 arm. After a package has been picked up, the conveyor belt is restarted at the maximum speed.</p>
+
+<h4 id="logical-camera"><div style="color:blue"><b>Logical Camera:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspThis camera is used to determine the package number, ex. ‘packagen00’ which is then stored into the dictionary and the used to update the Google SpreadSheet for dispatched and shipped updates.</p>
+
+<h4 id="ur52-arm"><div style="color:blue"><b>UR5#2 Arm:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspThe UR5#2 arm is used to pick the package from the conveyor and place the package in its identical coloured bin.</p>
+
+<h4 id="updating-spreadsheets"><div style="color:blue"><b>Updating Spreadsheets:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspWe update a total of five spreadsheets in real time to make data management and visualization easy. These five spreadhseets are:
+
+<ul>
+<li>Inventory</li>
+<li>Incoming Orders</li>
+<li>Orders Dispatched</li>
+<li>Orders Shipped</li>
+<li>Dashboard</li>
+</ul></p>
+
+<p><b>Inventory</b></p>
+<p>This sheet contains details of all 12 packags on the shelf, as identified by Camera#1.</p>
+<p><b>Incoming Orders</b></p>
+<p>This sheet contains details about the incoming orders, which is a list of dictionaries as explained above.</p>
+<p><b>Orders Dispatched</b></p>
+<p>This sheet is updated with details about each order once it has been dispatched, i.e. when UR5#1 drops the package oto the conveyor belt.</p>
+<p><b>Orders Shipped</b></p>
+<p>This sheet is updated with details about each order once it has been shipped, i.e. when UR5#2 successfully sorts the package into the correct bin.</p>
+<p><b>Dashboard</b></p>
+<p>&nbsp&nbsp&nbsp&nbspThis sheet contains a compilation of data from the above spreadhsheets and keeps track of the status of each order. The dashboard webpage also sources its data from this spreadsheet.</p>
+
+<p>&nbsp&nbsp&nbsp&nbspOnce an order has been dispatched or shipped (i.e. a package has been dropped onto the conveyor belt or sorted into a bin), a goal is sent to an Action Server containing a dictionary filled with details about the package that has been dispatched or shipped. The node which communicates between ROS and IOT then subscribes to this Action message, which prompts it to update the correct spreadhsheet with the relevant information.</p>
+
+<h4 id="google-apps-scripting"><div style="color:blue"><b>Google Apps Scripting:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspWhen a HTTP GET request is sent from the nodes (python file), the columns and rows get updated automatically through the google app script code of the spreadsheets.</p>
+
+<p>&nbsp&nbsp&nbsp&nbspThe values for all columns in the spreadsheet are recieved as parameters in the HTTP request by the node.</p>
+
+<h4 id="email"><div style="color:blue"><b>Email:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspWhen an order gets shipped or dispatched a mail is sent to the customer with details about the shipped or dispatched package.</p>
+
+<h4 id="dashboard"><div style="color:blue"><b>Dashboard:</b></div></h4>
+<p>&nbsp&nbsp&nbsp&nbspDashboard shows the status of the orders in real-time
+The dashboard consists of 3 parts:
+<ol>
+<li>Geolocation(map) showing information about Inventory order</li>
+<li>Table showing the live status of the orders</li>
+<li>Graph showing the status of time taken for each order</li>
+</ol></p>
+
+<p>&nbsp&nbsp&nbsp&nbspWhen a package is shipped the table gets updated with the following information:
+<ul>
+
+<li>Order ID</li>
+<li>Item</li>
+<li>Priority</li>
+<li>Quantity</li>
+<li>City</li>
+<li>Dispatched</li>
+<li>Shipped</li>
+<li>Order Date and Time</li>
+<li>Dispatch Date and Time</li>
+<li>Shipping Date and Time</li>
+<li>Time Taken</li>
+
+</ul></p>
+
+<p>&nbsp&nbsp&nbsp&nbspA red marker is put on the map when an order is placed at a certain location. 
+When the order gets dispatched the marker changes to yellow colour and after the order is shipped the marker colour changes to green.</p>
+
+<p>&nbsp&nbsp&nbsp&nbspThe dashboard is updated in real time i.e. every time an order is shipped or dispatched the table, map and graph are updated.</p>
+
+<h4 id="dashboard-light-mode"><b>Dashboard Light Mode</b></h4>
+<p><img alt="Light dashboard" src="images/Dashboard_Light.png" /></p>
+<h4 id="dashboard-dark-mode"><b>Dashboard Dark Mode</b></h4>
+<p><img alt="Dark dashboard" src="images/Dashboard_Dark.png" /></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"search": 83, "next": 78, "help": 191, "previous": 80};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
